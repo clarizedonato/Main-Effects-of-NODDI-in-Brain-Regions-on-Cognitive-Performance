@@ -1,0 +1,38 @@
+%%this code will show only a general overview of the process of creating linear regression models  
+
+%% change directories into your own directory with your data. 
+cd C:\Users\your_username\folder_with_your_data
+
+%% import your data; you can clean your data if necessary (ex. check with histograms, etc)
+cognitive_data = readtable("cognitive_data.xlsx");
+isovf_data = readtable("isovf_data.xlsx");
+cortical_thickness_data = readtable("cortical_thickness_data.xlsx")
+
+%% merging tables together; using outerjoin specifically to join the tables, so that rows with missing values are kept and not deleted
+%% merging tables via participant ID 
+optdata_CT = outerjoin(optdata, cortical_thickness_data,'Keys','ID_complete', 'MergeKeys', true);
+optdata_CT_isovf = outerjoin(optdata_CT, isovf_data, 'Keys', 'ID_complete', 'MergeKeys', true);
+
+%% creating a variable named roinames, and these columns are the different brain regions, where each row is the noddi isovf value for a given participant for a given brain region
+%% roinames here is 74 brain regions 
+roinames=optdata_CT_isovf.Properties.VariableNames([696, 697, 712, 713, 727:760, 762:795, 797, 798]);
+
+%% the code below will show a basic code for how to perform the linear regression
+%% here, I am using a linear regresion model to see whether noddi isovf (roinames) predicts cognitive performance (here, delayed memory performance; MDMIS_01) in individuals with treatment-resistant late-life depression
+%% Covariates included in this model are age (AGE), sex (SEX), and the site (SITE_TXT_data) at which participants' data was taken
+%% I am using a loop to go through each participants' noddi isovf values in each of the 74 brain regions 
+
+stats_MDMIS_isovf_final=table(); %% creating a new table to store my statistics 
+for i=1:75
+    mdl = fitlm(optdata_CT_isovf, strcat('MDMIS_01 ~', roinames{i}, '+AGE+SEX+SITE_TXT_data'));
+    stats_MDMIS_isovf_final.tStat(i)=mdl.Coefficients.tStat(7);
+    stats_MDMIS_isovf_final.pValue(i)=mdl.Coefficients.pValue(7);
+end
+
+stats_MDMIS_isovf_final.adjusted_pValues=bhfdr(stats_MDMIS_isovf_final.pValue); %%calculating FDR corrected p-values and storing them as adjusted p-values in my new statistics table
+stats_MDMIS_isovf_final.roinames = roinames'; %%adding the names of the brain regions for each row 
+stats_MDMIS_isovf_final.main_effects = 2*stats_MDMIS_isovf_final.tStat/sqrt(188); %%calculating main effects
+stats_MDMIS_isovf_final=stats_MDMIS_isovf_final(:,{'roinames','tStat', 'pValue', 'adjusted_pValues', 'main_effects'}); %%organizing the columns in the table
+writetable(stats_MDMIS_isovf_final, 'stats_MDMIS_isovf_final.csv'); %%saving the final statistics table
+
+
