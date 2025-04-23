@@ -5,4 +5,4 @@ This code is meant to be run in MATLAB R2024b, and will be helpful for users who
 
 Below is an example of the scatterplot visualizations. 
 
-![image](https://github.com/user-attachments/assets/83510455-9a1e-45c4-a5d4-c22e3fcab85b)
+![lh_inferiorparietal_isovf_MDMIS_ncd](https://github.com/user-attachments/assets/7279f6bf-bd45-4ed1-9712-89591851b7fa)
