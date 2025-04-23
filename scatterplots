@@ -1,0 +1,22 @@
+%% creating scatterplots to visualize my data 
+%% based on the statistics table which was created, choosing to plot brain regions with adjusted p-values that are lower than 0.05 
+
+%% Scatterplots
+%%need to convert CDR (clinical dementia rating) to 0 (no mild cognitive impairment) and 1 (MCI/AD) before scatterplotting
+%%before scatterplotting
+
+ix0=(optdata_CT_isovf.CDRSCORE_01 == 0); %%no cognitive impairment
+ix1=(optdata_CT_isovf.CDRSCORE_01 >= 0.5); %%MCI/AD
+
+%%example of a brain region, left supramarginal gyrus, that had a significant adjusted p-value that is less than 0.05 (pFDR < 0.05)
+%%left supramarginal
+figure; 
+scatter(optdata_CT_isovf.ctx_lh_supramarginal, optdata_CT_isovf.MDMIS_01, 15, "black", "filled");
+hold on; 
+lsline; %%plotting a single regression line across both the no cognitive impairment and mild cognitive impairment/alzheimer's groups
+h=lsline;
+set(h(1), 'Color', 'k', 'LineWidth', 1);
+scatter(optdata_CT_isovf.ctx_lh_supramarginal(ix0), optdata_CT_isovf.MDMIS_01(ix0), 15,"blue","filled"); %%values of participants with no cognitive impairment will be coloured blue
+scatter(optdata_CT_isovf.ctx_lh_supramarginal(ix1), optdata_CT_isovf.MDMIS_01(ix1), 15,"red","filled"); %%values of participants with mild cognitive impairment/alzheimer's disease will be coloured red 
+[r_supramarginal_gyrus, p_supramarginal_gyrus] = corr(optdata_CT_isovf.ctx_lh_supramarginal, optdata_CT_isovf.MDMIS_01, 'rows', 'pairwise'); %%producing a correlation matrix between noddi isovf values and cognitive performance values
+xlim([0.05,0.35]);
